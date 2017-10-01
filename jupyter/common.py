@@ -25,8 +25,8 @@ def fit_scale(data, smooth = 7):
     for k, v in data[~np.isnan(data['LinkTravelTime'])].sort_values('LineDirectionLinkOrder').groupby('LinkRef', sort = False):
         median = np.median(v['LinkTravelTime']);
         mad = 1.4826 * np.median(np.abs(v['LinkTravelTime'] - median))
-        low[k] = max(median - 3 * mad, 0)
-        upr[k] = median + 3 * mad
+        low[k] = max(median - 2 * mad, 0)
+        upr[k] = median + 2 * mad
 
         mean = v[(low[k] < v['LinkTravelTime']) & (v['LinkTravelTime'] < upr[k])].groupby("DowTimeRef")["LinkTravelTime"].mean()
         mean = mean.interpolate().rolling(window = smooth, center = True).mean()
@@ -43,3 +43,31 @@ def remove_outliers(data, low, upr):
     mask = ~(_low < data['LinkTravelTime']) & (data['LinkTravelTime'] < _upr)
     data.loc[mask, 'LinkTravelTime'] = np.nan
     return mask.sum()
+
+def transform(data, means_df, scales, low, upr, freq = '15min'):
+    tss = { }
+    ws = { }
+    removed_mean = { }
+    removed_scale = { }
+    ks = []
+    for k, v in data.sort_values('LineDirectionLinkOrder').groupby('LinkRef', sort = False):
+        # Link Data Time Indexed
+        link_time_ix = pd.DatetimeIndex(pd.to_datetime(v['DateTime']))    
+        link_time_ixd = v.set_index(link_time_ix)
+        
+        # Link Reference Data Index
+        ix_ref = link_time_ixd['DowTimeRef']  
+
+        link_travel_time_k = link_time_ixd['LinkTravelTime'].resample(freq).mean()
+        removed_mean[k] = pd.Series(data = means_df.loc[ix_ref, k].values, index = link_time_ix).resample(freq).mean()
+        removed_scale[k] = pd.Series(data = np.repeat(scales[k], link_travel_time_k.shape[0]), index = link_travel_time_k.index)
+        tss[k] = (link_travel_time_k - removed_mean[k].values) / removed_scale[k].values
+        ws[k] = link_time_ixd['LinkTravelTime'].resample(freq).count()
+
+        ks.append(k)
+        
+    ts = pd.DataFrame(data = tss).fillna(method='pad').fillna(0) # Link Travel Time Time Series
+    df_removed_mean = pd.DataFrame(data = removed_mean, index = ts.index).fillna(method='pad').fillna(method='bfill') # Removed Mean from Link Travel Time
+    df_removed_scale = pd.DataFrame(data = removed_scale, index = ts.index).fillna(method='pad').fillna(method='bfill')
+    w = pd.DataFrame(data = ws).fillna(0) # Link Travel Time Weights, e.g. number of measurements
+    return (ts.index, ts.values, df_removed_mean.values, df_removed_scale.values, w.values, ks)
