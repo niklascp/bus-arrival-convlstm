@@ -12,37 +12,47 @@ def prep_data(file, sep = ';', ref_freq = '15min'):
     ix = pd.DatetimeIndex(pd.to_datetime(data['DateTime'])).floor(ref_freq)
     
     data["DateTimeRef"] = ix
-    data["DowTimeRef"] = rankdata(data['DayOfWeek'].values * 10000 + ix.hour*100 + ix.minute, 'dense')
+    data["DowTimeRef"] = pd.to_datetime((data['DayOfWeek'].values - 1) * 24 * 60 * 60 + ix.hour * 60 * 60 + ix.minute * 60, unit = 's')
     
     return data
 
-def fit_scale(data, smooth = 7):
+def fit_scale(data, smooth = 1, ref_freq = '15min'):
     means = { }
     scales = { }
     low = { }
     upr = { }
 
-    for k, v in data[~np.isnan(data['LinkTravelTime'])].sort_values('LineDirectionLinkOrder').groupby('LinkRef', sort = False):
+    for link_ref, v in data[~np.isnan(data['LinkTravelTime'])].sort_values('LineDirectionLinkOrder').groupby('LinkRef', sort = False):
+        # Fit outlier bounds using MAD
         median = np.median(v['LinkTravelTime']);
         mad = 1.4826 * np.median(np.abs(v['LinkTravelTime'] - median))
-        low[k] = max(median - 2 * mad, 0)
-        upr[k] = median + 2 * mad
-
-        mean = v[(low[k] < v['LinkTravelTime']) & (v['LinkTravelTime'] < upr[k])].groupby("DowTimeRef")["LinkTravelTime"].mean()
-        mean = mean.interpolate().rolling(window = smooth, center = True).mean()
-        means[k] = mean
-        #scales[k] = v_[(low[k] < v_['LinkTravelTime']) & (v_['LinkTravelTime'] < upr[k])]['LinkTravelTime'].std()
-        scales[k] = 1
+        low[link_ref] = max(median - 2 * mad, 0)
+        upr[link_ref] = median + 2 * mad
+        no_outliers = v[(low[link_ref] < v['LinkTravelTime']) & (v['LinkTravelTime'] < upr[link_ref])]
         
-    means_df = pd.DataFrame(data = means).fillna(method='pad').fillna(method='bfill')
+        mean = no_outliers.groupby('DowTimeRef')["LinkTravelTime"].mean()
+        means[link_ref] = mean
+        #scales[k] = v_[(low[k] < v_['LinkTravelTime']) & (v_['LinkTravelTime'] < upr[k])]['LinkTravelTime'].std()
+        scales[link_ref] = 1
+    
+    means_ix = pd.date_range('1970-01-01', '1970-01-08', freq = ref_freq, closed = 'left')
+    means_df = pd.DataFrame(data = means, index = means_ix).interpolate()
+    
+    if smooth >= 1:
+        means_df = means_df.rolling(window = smooth, center = True).mean()
+        
+    # Fill NaNs
+    means_df = means_df.fillna(method='pad').fillna(method='bfill')
+    
     return (means_df, scales, low, upr)
 
 def remove_outliers(data, low, upr): 
     _low = data['LinkRef'].apply(lambda k: low[k])
     _upr = data['LinkRef'].apply(lambda k: upr[k])
-    mask = ~(_low < data['LinkTravelTime']) & (data['LinkTravelTime'] < _upr)
+    mask = ~((_low < data['LinkTravelTime']) & (data['LinkTravelTime'] < _upr))
+    data = data.copy()
     data.loc[mask, 'LinkTravelTime'] = np.nan
-    return mask.sum()
+    return data, mask.sum()
 
 def transform(data, means_df, scales, low, upr, freq = '15min'):
     tss = { }
