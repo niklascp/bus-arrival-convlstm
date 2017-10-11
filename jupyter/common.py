@@ -29,8 +29,8 @@ def fit_scale(data, smooth = 1, ref_freq = '15min'):
         error = pd.concat([data_link['DowTimeRef'], np.abs(data_link['LinkTravelTime'] - median[data_link['DowTimeRef']].values)], axis = 1)
         mad = 1.4826 * error.groupby('DowTimeRef')['LinkTravelTime'].median()
         
-        _low = median - 3 * mad
-        _upr = median + 3 * mad
+        _low = median - 5 * mad
+        _upr = median + 5 * mad
         mask = (_low[data_link['DowTimeRef']].values < data_link['LinkTravelTime']) & (data_link['LinkTravelTime'] < _upr[data_link['DowTimeRef']].values)
         data_link_no = data_link[mask]
         
