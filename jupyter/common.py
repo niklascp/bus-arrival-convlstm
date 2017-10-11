@@ -26,8 +26,8 @@ def fit_scale(data, smooth = 1, ref_freq = '15min'):
         # Fit outlier bounds using MAD
         median = np.median(v['LinkTravelTime']);
         mad = 1.4826 * np.median(np.abs(v['LinkTravelTime'] - median))
-        low[link_ref] = max(median - 2 * mad, 0)
-        upr[link_ref] = median + 2 * mad
+        low[link_ref] = max(median - 3 * mad, 0)
+        upr[link_ref] = median + 3 * mad
         no_outliers = v[(low[link_ref] < v['LinkTravelTime']) & (v['LinkTravelTime'] < upr[link_ref])]
         
         mean = no_outliers.groupby('DowTimeRef')["LinkTravelTime"].mean()
@@ -81,3 +81,13 @@ def transform(data, means_df, scales, low, upr, freq = '15min'):
     df_removed_scale = pd.DataFrame(data = removed_scale, index = ts.index).fillna(method='pad').fillna(method='bfill')
     w = pd.DataFrame(data = ws).fillna(0) # Link Travel Time Weights, e.g. number of measurements
     return (ts.index, ts.values, df_removed_mean.values, df_removed_scale.values, w.values, ks)
+
+def roll(ix, ts, removed_mean, removed_scale, w, lags, preds):
+    X = np.stack([np.roll(ts, i, axis = 0) for i in range(lags, 0, -1)], axis = 1)[lags:-preds,]
+    Y = np.stack([np.roll(ts, -i, axis = 0) for i in range(0, preds, 1)], axis = 1)[lags:-preds,]
+    Y_ix = ix[lags:-preds]
+    Y_mean = np.stack([np.roll(removed_mean, -i, axis = 0) for i in range(0, preds, 1)], axis = 1)[lags:-preds,]
+    Y_scale = np.stack([np.roll(removed_scale, -i, axis = 0) for i in range(0, preds, 1)], axis = 1)[lags:-preds,]
+    w_y = np.stack([np.roll(w, -i, axis = 0) for i in range(0, preds, 1)], axis = 1)[lags:-preds,]
+
+    return X, Y, Y_ix, Y_mean, Y_scale, w_y
