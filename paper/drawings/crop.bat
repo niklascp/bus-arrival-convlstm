@@ -1,1 +1,0 @@
-pdfcrop data_shape.pdf
