@@ -48,7 +48,7 @@ def fit_scale(data, ref_freq = '15min'):
     low_df = low_df.fillna(method='pad').fillna(method='bfill')
     upr_df = upr_df.fillna(method='pad').fillna(method='bfill')
     
-    return (means_df, scales, low_df, upr_df)
+    return means_df, scales, low_df, upr_df
 
 def remove_outliers(data, low, upr): 
     _low = low.lookup(data['DowTimeRef'], data['LinkRef'])
