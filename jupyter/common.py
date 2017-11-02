@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 
-from scipy.stats import rankdata
-
 def prep_data(file, sep = ';', ref_freq = '15min'):
     data = pd.read_csv(file, sep)
 
@@ -16,7 +14,7 @@ def prep_data(file, sep = ';', ref_freq = '15min'):
     
     return data
 
-def fit_scale(data, smooth = 1, ref_freq = '15min'):
+def fit_scale(data, ref_freq = '15min'):
     means = { }
     scales = { }
     low = { }
@@ -29,8 +27,8 @@ def fit_scale(data, smooth = 1, ref_freq = '15min'):
         error = pd.concat([data_link['DowTimeRef'], np.abs(data_link['LinkTravelTime'] - median[data_link['DowTimeRef']].values)], axis = 1)
         mad = 1.4826 * error.groupby('DowTimeRef')['LinkTravelTime'].median()
         
-        _low = median - 5 * mad
-        _upr = median + 5 * mad
+        _low = median - 3 * mad
+        _upr = median + 3 * mad
         mask = (_low[data_link['DowTimeRef']].values < data_link['LinkTravelTime']) & (data_link['LinkTravelTime'] < _upr[data_link['DowTimeRef']].values)
         data_link_no = data_link[mask]
         
@@ -38,17 +36,13 @@ def fit_scale(data, smooth = 1, ref_freq = '15min'):
         means[link_ref] = _mean
         low[link_ref] = _low
         upr[link_ref] = _upr
-        #scales[k] = v_[(low[k] < v_['LinkTravelTime']) & (v_['LinkTravelTime'] < upr[k])]['LinkTravelTime'].std()
-        scales[link_ref] = 1
+        scales[link_ref] = data_link_no['LinkTravelTime'].std()
     
     ix = pd.date_range('1970-01-01', '1970-01-08', freq = ref_freq, closed = 'left')
     means_df = pd.DataFrame(data = means, index = ix).interpolate()
     low_df = pd.DataFrame(data = low, index = ix).interpolate()
     upr_df = pd.DataFrame(data = upr, index = ix).interpolate()
-    
-    if smooth >= 1:
-        means_df = means_df.rolling(window = smooth, center = True).mean()
-        
+            
     # Fill NaNs    
     means_df = means_df.fillna(method='pad').fillna(method='bfill')
     low_df = low_df.fillna(method='pad').fillna(method='bfill')
