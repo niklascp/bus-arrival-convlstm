@@ -232,19 +232,19 @@ During training the variables $\mathit{\bar{x}_{\mathit{ln},\mathit{dow},\mathit
     \centering
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{plots/decycle_5min.pdf}
+        \includegraphics[width=\textwidth]{plots/decycle_5min_n.pdf}
         \caption{5 min}
     \end{subfigure}%
     ~ 
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{plots/decycle_15min.pdf}
+        \includegraphics[width=\textwidth]{plots/decycle_15min_n.pdf}
         \caption{15 min}
     \end{subfigure}
     ~
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{plots/decycle_30min.pdf}
+        \includegraphics[width=\textwidth]{plots/decycle_30min_n.pdf}
         \caption{30 min}
     \end{subfigure}
 
@@ -267,8 +267,8 @@ For evaluation the method is applied to a dataset from Copenhagen's public trans
 
 The geography of the route is shown in \Cref{fig:4a_map}. As the line circles Central Copenhagen, it is potentially highly sensitive to congestion to/from the city as it intersects with several large corridors along its route. Southeast of the city center the lines splits in different destination patterns (gray), therefore only the first 32 links are considered in this experiment (red).
 
-\subsection{Data preprocessing}
-Furthermore, to allow predictions for fixed time-steps ahead, data was aggregated at a fixed resolution. \Cref{fig:resolutions} shows examples of travel time for a single link and a single day at various time resolutions. The red dots are actual measurements, and the blue line the aggregated resolution. The choice depends of the \emph{expected} frequency of the line, and is a balance between capturing the details and still having a reasonal number of measurements in each time-step.
+\subsection{Time resolution}
+To allow predictions for fixed time-steps ahead, data is aggregated at a fixed resolution. \Cref{fig:resolutions} shows examples of travel time for a single link and a single day at various time resolutions. The black dots are actual measurements, and the lines the aggregated link travel time at the given resolution. The choice depends of the \emph{expected} frequency of the line, and is a balance between capturing the details and still having a reasonal number of measurements in each time-step.
 
 For this expirement data was aggregated into 15-minute time-steps and normalized cf.~\Cref{sec:model}.
 
