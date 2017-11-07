@@ -1,4 +1,5 @@
 \documentclass[preprint,11pt,5p,twocolumn]{elsarticle}
+\usepackage[utf8]{inputenc}
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{graphicx}
@@ -87,7 +88,7 @@ Besides real-time passenger information, robust arrival- and departure time pred
 
 Producing precise bus travel time predictions in areas with little external influence, e.g.\ rural areas, can be solved to a large extent with historical averaging or simple regression methods \cite{Williams2003,Altinkaya2013}. The problem becomes much more complex in urban areas where congestion, events, road-works, weather, etc.\ highly influences the traffic flow and passenger demand.
 
-In this paper we presents a multi-output, multi-time-step deep neural network for bus travel time prediction using a combination of \emph{Convolutional} and \emph{Long short-term memory} (LSTM) \cite{Lstm1,Lstm2} layers. The goal of this work is to produce precise short-term predictions (e.g.\ $0-1.5$ hours) for link travel time, specifically for bus traffic in urban areas. The method is evaluated and compared to other popular approaches for link travel time prediction, and currently available services.
+In this paper we presents a multi-output, multi-time-step deep neural network for bus travel time prediction using a combination of \emph{Convolutional} and \emph{Long short-term memory} (LSTM) \cite{Lstm1,Lstm2} layers. The goal of this work is to produce precise short-term predictions (e.g.\ $0-1.5$ hours) for link travel time, specifically for bus traffic in urban areas. The method is evaluated and compared to other popular approaches for link travel time prediction, and public available services, e.g.\ Google Traffic.
 
 The paper is structured in the following manner: In the next section related work and literature is reviewed. \Cref{sec:convlstm} introduces Convolutional LSTM neural networks in general and in \Cref{sec:model} we present the proposed multi-output model in more details, including e.g.\ network topology, etc. \Cref{sec:experiments} introduces the Copenhagen-dataset, which the model has been evaluated on, and our results are presented and discussed in~\Cref{sec:results}. Finally we conclude on the work in~\Cref{sec:conclusion}.
 
@@ -104,7 +105,7 @@ Finally \citet{YanjieDuan2016} proposes to use LSTM model for general highway tr
 
 \section{Convolutional LSTM neural networks}
 \label{sec:convlstm}
-A Long short-term memory (LSTM) neural network is a special type of Recurrent Neural Network~(RNN) which has proven robust for capturing long-distance dependencies \cite{Lstm1,Lstm2}. The important feature of a LSTM network is its capability to persist cell state, $c_t$, from previous observations across sequences of input (e.g.\ time), but also eliminate information which is considered unimportant. To allow this mechanism the persistence of information is controlled by three gates: \emph{input gate}, \emph{forget gate}, and \emph{output gate}. Each gate yields a state value at time $t$, respectively $i_t$, $f_t$, and $o_t$, along with the cell output, $h_t$, cf.\ \Cref{eq:lstm}, where $\circ$ denotes the entry-wise product.
+A Long short-term memory (LSTM) neural network is a special type of Recurrent Neural Network~(RNN) which has proven robust for capturing long-distance dependencies \cite{Lstm1,Lstm2}. The important feature of a LSTM network is its capability to persist cell state, $c_t$, from previous observations across sequences of input (e.g.\ time), but also eliminate information which is considered unimportant. To allow this mechanism the persistence of information is controlled by three gates: \emph{input gate}, \emph{forget gate}, and \emph{output gate}. Each gate yields a state value at time $t$, respectively $i_t$, $f_t$, and $o_t$, along with the cell output, $h_t$, cf.~\cref{eq:lstm}, where $\circ$ denotes the entry-wise product.
 
 \begin{equation}
 \begin{aligned}
@@ -139,7 +140,7 @@ Convolutional Neural Networks~(CNN) on the other hand has been widely used for c
 
 Special care needs to be taken on the boundaries, i.e.\ where the convolutional filter will exceed the input. A popular approach to avoid the size of the output decreases is to pad the input, e.g.\ with zeros. This ensures that the output shape of each convolutional unit will always be identical to the input shape, which is often desirable. One of the key benefits of convolutional networks is that the number of weights that needs to be learned is considerably reduced compared to fully connected networks, and that learned patterns can be transfered across space. I.e.\ the convolutional filters become feature detectors, that in our case can detect spacial patterns across links, e.g.\ congestion forming, etc.   
 
-\citet{ConvLSTM} introduced the novel combination of Convolutional and LSTM layers into a single structure, the \emph{Convolutional LSTM}, or simply \emph{ConvLSTM}. Specifically the method applies convolutional filters in the \emph{input-to-state} and \emph{state-to-state} transitions the LSTM cf.\ \Cref{eq:convlstm}, where $*$ denotes the convolution operator.
+\citet{ConvLSTM} introduced the novel combination of Convolutional and LSTM layers into a single structure, the \emph{Convolutional LSTM}, or simply \emph{ConvLSTM}. Specifically the method applies convolutional filters in the \emph{input-to-state} and \emph{state-to-state} transitions the LSTM cf.~\cref{eq:convlstm}, where $*$ denotes the convolution operator.
 
 \begin{equation}
 \begin{aligned}
@@ -199,7 +200,7 @@ We expect link travel times from AVL-systems to be available in a tabular form, 
 
 For the \emph{ConvLSTM} model to be able to capture the desired spatial-–temporal patterns, the input data must be arranged in a suitable manner: I.e.\ in $N$ samples, each with a window of the $w$ lagging time-steps $t-w+1, \ldots, t$, and each time-step with $u$ link travel times $1, \ldots, u$ cf.~\Cref{fig:data_shape}.
 
-Likewise is the output arranged with $N$ predictions of $k$ time steps ahead, $t+1, \ldots, t+k$. Thus the input is a 4D-tensor with shape $(N, w, u, 1)$, and the output a 4D-tensor with shape $(N, k, u, 1)$ -- in both bases the last one refers to the single link travel time for each time-step/link combination. It is emphasized that each prediction consists of travel time predictions for all links for the next $k$ time-steps, i.e.\ multi-output, multi-time-step prediction.
+Likewise is the output arranged with $N$ predictions of $k$ time steps ahead, $t+1, \ldots, t+k$. Thus the input is a 4D-tensor, $X$ with shape $(N, w, u, 1)$, and the output, $Y$, a 4D-tensor with shape $(N, k, u, 1)$ -- in both bases the last one refers to the single link travel time for each time-step/link combination. It is emphasized that each prediction consists of travel time predictions for all links for the next $k$ time-steps, i.e.\ multi-output, multi-time-step prediction.
 
 The $N$ samples are sampled at a fixed time resolution, since we need a shared time reference across all links. \Cref{sec:experiments} elaborates on some of the considerations in choosing a sound resolution.
 
@@ -211,7 +212,7 @@ The $N$ samples are sampled at a fixed time resolution, since we need a shared t
 \end{figure}
 
 \subsection{Detrending}
-Urban bus travel times varies throughout the time of the day, and the day of the week due to \emph{recurring congestion}. In order to reduce the need for the network to learn this recurring variation, link travel for link $\mathit{ln} \in \{ 1,\ldots,u\}$, at time-step $t$, $x_{\mathit{ln},t}$, is normalized to focus on deviations from the normal and expected pattern. Travel times are centered with the mean for each link, at the time of day, and day of week, $\mathit{\bar{x}_{\mathit{ln},\mathit{dow},\mathit{tod}}}$, and scaled with the standard deviation for each link, $\sigma_\mathit{ln}$, cf.\ \Cref{eq:normalization}.
+Urban bus travel times varies throughout the time of the day, and the day of the week due to \emph{recurring congestion}. In order to reduce the need for the network to learn this recurring variation, link travel for link $\mathit{ln} \in \{ 1,\ldots,u\}$, at time-step $t$, $x_{\mathit{ln},t}$, is normalized to focus on deviations from the normal and expected pattern. Travel times are centered with the mean for each link, at the time of day, and day of week, $\mathit{\bar{x}_{\mathit{ln},\mathit{dow},\mathit{tod}}}$, and scaled with the standard deviation for each link, $\sigma_\mathit{ln}$, cf.~\cref{eq:normalization}.
 
 \begin{equation}
   x'_{\mathit{ln},t} = \frac{x_{\mathit{ln},t} - \bar{x}_{\mathit{ln},\mathit{dow},\mathit{tod}}}{\sigma_\mathit{ln}}
@@ -223,8 +224,8 @@ A similar normalization is applied to the predicted travel times, $y_{\mathit{ln
 When calculating the mean and standard deviation it can be beneficial to exclude extreme outliers, since both mean and standard deviation are higly sensitive to such measurements. A suggested method is to apply \emph{absolute deviation around the median} (MAD) cf.~\cite{Olewuezi2011} when calculating $\mathit{\bar{x}_{\mathit{ln},\mathit{dow},\mathit{tod}}}$ and $\sigma_\mathit{ln}$.
 
 
-\subsection{Training}
-The network is trained using the \emph{RMSprop}-algorithm \cite{RMSprop}.
+\subsection{Implementation and training}
+The proposed network model was implemented in Python using the Keras Framework \cite{Keras}, and trained using the \emph{RMSprop}-algorithm \cite{RMSprop}.
 
 During training the variables $\mathit{\bar{x}_{\mathit{ln},\mathit{dow},\mathit{tod}}}$ and $\sigma_\mathit{ln}$ should be calculated solely based on the training set, to emulated real-world application.
 
@@ -248,7 +249,7 @@ During training the variables $\mathit{\bar{x}_{\mathit{ln},\mathit{dow},\mathit
         \caption{30 min}
     \end{subfigure}
 
-    \caption{Examples of travel time for a single link at various time resolutions.}
+    \caption{Examples of travel time for a single link over a single day, at various time resolutions.}
     \label{fig:resolutions}
 \end{figure*}
 \newpage
@@ -256,7 +257,7 @@ During training the variables $\mathit{\bar{x}_{\mathit{ln},\mathit{dow},\mathit
 \section{Experiments}
 \label{sec:experiments}
 
-For evaluation the method is applied to a dataset from Copenhagen's public transport authority, ``Movia''. The dataset consists of 1,2~M~travel time observations for the ``4A'' bus line in the period January 1 to August 31 2017. The data points were collected using the real-time AVL-system installed in all vehicles of the line. 
+For evaluation the method is applied to a dataset from Copenhagen's public transport authority, ``Movia''. The dataset consists of 1,2~M~travel time observations for the ``4A'' bus line in the period May to October 2017. The data points were collected using the real-time AVL-system installed in every vehicle servicing the line. 
 
 \begin{figure}[!ht]
   \centering
@@ -265,88 +266,121 @@ For evaluation the method is applied to a dataset from Copenhagen's public trans
   \label{fig:4a_map}
 \end{figure}
 
-The geography of the route is shown in \Cref{fig:4a_map}. As the line circles Central Copenhagen, it is potentially highly sensitive to congestion to/from the city as it intersects with several large corridors along its route. Southeast of the city center the lines splits in different destination patterns (gray), therefore only the first 32 links are considered in this experiment (red).
+The geography of the route is shown in \Cref{fig:4a_map}. As the line circles Central Copenhagen, it is potentially highly sensitive to congestion to/from the city as it intersects with several large corridors along its route. Southeast of the city center the line splits in different destination patterns (gray), therefore only the first 32 links are considered in this experiment (red).
 
 \subsection{Time resolution}
-To allow predictions for fixed time-steps ahead, data is aggregated at a fixed resolution. \Cref{fig:resolutions} shows examples of travel time for a single link and a single day at various time resolutions. The black dots are actual measurements, and the lines the aggregated link travel time at the given resolution. The choice depends of the \emph{expected} frequency of the line, and is a balance between capturing the details and still having a reasonal number of measurements in each time-step.
+To allow predictions for fixed time-steps ahead, data is aggregated at a fixed time resolution. \Cref{fig:resolutions} shows examples of travel time for a single link over a single day at various time resolutions. The black dots are actual measurements, and the lines the aggregated mean link travel time at the given resolution. The choice depends of the \emph{expected} frequency of the line, and is a balance between capturing the details and still having a reasonal number of measurements in each time-step to avoid over-fitting.
 
-For this expirement data was aggregated into 15-minute time-steps and normalized cf.~\Cref{sec:model}.
+For this experiment data was aggregated into 15-minute time-steps and normalized cf.~\Cref{sec:model}. This resolution were chosen based on a measured mean \emph{headway} of $7.5$ minutes between 06:00 and 22:00, i.e.\ the time between two vehicles during daytime.
 
 
 
-The implementation of the proposed model was done in Python using Keras \cite{Keras}.
 
 
 
 
 %TODO: How much used for training, how much for testing?
 \subsection{Evaluation}
-In order to evaluate the presented model and comparisons, the following measures is used: \emph{mean absolute error} (MAE), \emph{root mean square error} (RMSE), and \emph{mean absolute percentage error} (MAPE) cf.~\Cref{eq:mae,eq:rmse,eq:mape}, where $X_i$ is the true travel time for sample $i$ and $\widehat{X}_i$ is the predicted travel time.
+In order to evaluate the presented model and comparisons, the following measures is used: \emph{mean absolute error} (MAE), \emph{root mean square error} (RMSE), and \emph{mean absolute percentage error} (MAPE) cf.~\cref{eq:mae,eq:rmse,eq:mape}, where $Y_i$ is the true link travel times for sample $i$ and $\widehat{Y}_i$ is the predicted travel time.
 
 \begin{equation}
-    \textrm{MAE}(X, \widehat{X}) = \frac{\sum_{i = 1}^{n} \left| X_i - \widehat{X}_i \right| }{n}
+    \textrm{MAE}(Y, \widehat{Y}) = \frac{\sum_{i = 1}^{N} \left| Y_i - \widehat{Y}_i \right| }{N}
     \label{eq:mae}
 \end{equation}
 
 \begin{equation}
-    \textrm{RMSE}(X, \widehat{X}) = \sqrt{\frac{\sum_{i = 1}^{n} \left(X_i - \widehat{X}_i \right)^2}{n}}
+    \textrm{RMSE}(Y, \widehat{Y}) = \sqrt{\frac{\sum_{i = 1}^{N} \left(Y_i - \widehat{Y}_i \right)^2}{N}}
     \label{eq:rmse}
 \end{equation}
 
 \begin{equation}
-    \textrm{MAPE}(X, \widehat{X}) = \frac{1}{n} \sum_{i = 1}^{n} \left| \frac{X_i - \widehat{X}_i}{X_i} \right| 
+    \textrm{MAPE}(Y, \widehat{Y}) = \frac{1}{N} \sum_{i = 1}^{N} \left| \frac{Y_i - \widehat{Y}_i}{Y_i} \right| 
     \label{eq:mape} 
 \end{equation}
+\vspace{.5em}
+
+\begin{table*}[!t]
+    \center
+    \begin{tabular}{ll|rrr}
+        Model & Time ahead & RMSE (min) & MAE (min) & MAPE (\%) \\
+        \hline         
+        \hline
+        Historical average &                & 4.35 & 3.23 & 6.51 \% \\ 
+        \hline 
+        Current model      & t + 1 (15 min) & 4.92 & 3.90 & 8.05 \% \\
+                           & t + 2 (30 min) & 4.91 & 3.46 & 6.82 \% \\
+                           & t + 3 (45 min) & 5.47 & 4.15 & 8.68 \% \\
+        \hline 
+        Pure LSTM          & t + 1 (15 min) & 3.48 & 2.48 & 5.02 \% \\
+                           & t + 2 (30 min) & 3.56 & 2.51 & 5.08 \% \\
+                           & t + 3 (45 min) & 3.68 & 2.62 & 5.34 \% \\
+        \hline 
+        Google Traffic     & t + 1 (15 min) & 3.67 & 2.96 & 6.32 \% \\ 
+        \hline 
+        ConvLSTM           & t + 1 (15 min) & 2.66 & 1.99 & 4.19 \% \\
+                           & t + 2 (30 min) & 2.89 & 2.11 & 4.44 \% \\
+                           & t + 3 (45 min) & 3.11 & 2.27 & 4.75 \% \\
+        \hline 
+    \end{tabular}
+    \caption{Results of the presented and other popular models}
+    \label{tab:results}
+\end{table*}
+
+Since the multi-output, multi-time-step model predicts link travel times for all $u$ links for the next $k$ time steps, $Y_i$ and $\widehat{Y}_i$ are both $u \times k $ matrices. To allow a clear comparison, we reduce $Y_i$ and $\widehat{Y}_i$ by summing over all links cf.~\cref{eq:total}. This is equivalent of predicting the total travel time of all 32 links, and follows the initial approach for arrival/departure time prediction by accumulating link travel times.
+\begin{align}
+    Y_i' = \sum_{\mathit{ln} = 1}^{u} Y_{i,\mathit{ln}} & & \widehat{Y}_i' = \sum_{\mathit{ln} = 1}^{u} \widehat{Y}_{i,\mathit{ln}}
+    \label{eq:total} 
+\end{align}
+
+The model is trained on the prepared data using a sliding window approach to simulate real-world conditions where real-time travel time measurements arrives as a continuously data stream. We use 23 weeks of data for training, and one week of data for testing.
 
 \section{Results and discussion}
 \label{sec:results}
-The model is trained on the prepared data using a sliding window approach to simulate real-world conditions where real-time travel time measurements arrives as a continuously data stream. \Cref{fig:loss} shows the evolution of training and validation loss for each epoch for such a window, where the loss is the MAE if the individual links.
+The performance of our \emph{ConvLSTM} model for link travel time prediction is compared several other models and services using the presented evaluation:
+\begin{enumerate}
+   \item a naïve historical average model, i.e.\ equivalent of just predicting the normalized value, $\bar{x}_{\mathit{ln},\mathit{dow},\mathit{tod}}$ 
+   \item the current traffic prediction model deployed by ``Movia''.
+   \item a pure LSTM-model for link travel time prediction, i.e.\ without applying convolutional filters in state transitions.
+   \item travel time predictions from Google Traffic (part of Google Maps).
+\end{enumerate}
 
-\begin{figure*}[!ht]
+\begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.75\textwidth]{plots/comparison_day.pdf}
+  \includegraphics[width=\textwidth]{plots/comparison_day.pdf}
   \caption{}
   \label{fig:comparison_day}
 \end{figure*}
 
-d
-\begin{figure}[!ht]
-  \centering
-  \includegraphics[width=0.4\textwidth]{plots/conv_lstm_model_loss.pdf}
-  \caption{Training and validation loss evolution. TODO: Needs to be updated ...}
-  \label{fig:loss}
-\end{figure}
+\Cref{tab:results} shows the overall performance of the presented and the compared models. Predictions are limited to daytime, i.e.\ between 06:00 and 22:00 and accumulated downstream on journey level to simulate for use in real-time bus arrival/departure time prediction cf~\cref{eq:total}. 
 
-\Cref{tab:results} shows the results of the presented method and compares to two other methods: 1) a naïve historical average model, i.e. equivalent of just prediction the normalized value, $\bar{x}_{l,\mathit{dow},\mathit{tod}}$ and 2) a pure LSTM model as proposed by \cite{YanjieDuan2016}. Predictions are accumulated downstream on journey level to simulate for use in real-time bus arrival/departure time prediction.
+Before going into a direct comparison, it is important to understand some aspects of the compared models, and how measurements were collected.
 
+\subsection{Historical average}
+The performance of the historical average is independent with respect to the time steps ahead it predicts, as it just represents a weekly cycle of mean link travel times.
+
+\subsection{Current model}
+Measurements for the currently deployed bus prediction model was collected at a 5-minute frequency using a non-publicly accessible endpoint at the transport authority. The model is based on an historical average model, but has rule based mechanism on top, which can override or adjust the historical link travel times. For instance it will assume that a delayed vehicle can recover (partially or completely) from its delay by traversing links faster. Of course such an assumption can be problematic in an urban area with lots of external traffic effects. 
+
+\subsection{Pure LSTM}
+The pure LSTM-model for link travel time prediction is similar to the model proposed by \citet{YanjieDuan2016}. The model was trained on the exact same dataset as the \emph{ConvLSTM} model, and has a similar architecture, but without the convolutional filters.
+\newpage
+
+\subsection{Google Traffic}
+Measurements from the Google Traffic model were collected using the Google Maps Distance Matrix API~\citep{GMaps_DistanceMatrixAPI}. Google uses crowd-sourced road congestion data collected from smart-phones with the \emph{Google Maps App} installed \citep{GMaps_Crowdsourcing}. While the exact model powering the service is not publicly described in details, the documentation states that ``estimates of travel time is given (with respect to) what is known about both historical traffic conditions and live traffic''. And further, ``that live traffic becomes more important the closer the departure time is to now''.
+
+Because there is a limit on the number of request you can make freely to the API over a 24-hour period, it has only been possible to collect link travel times for the $t + 1$ time step (i.e.\ next 15 minutes).
+
+Another important aspect is that the Google Traffic model is primary designed for estimating car driving times, and can thus be biased away from bus link travel times used in this experiment.
+
+\subsection{Comparison}
 From the table it is found that the Convolutional LSTM performs better than the compared methods. Although the advantage might seem small it is emphasized that evaluation measurements are averaging their response, and thus the increased accuracy can be much higher on individual journeys, especially if they experienced very irregular travel times.
 
-\begin{table*}[!ht]
-    \caption{Results of the presented and other popular models}
-    \label{tab:results}
-    \center
-    \begin{tabular}{ll|rrr}
-        Model & Time ahead & MAE (min) & RMSE (min) & MAPE (\%) \\
-        \hline 
-        Historical average &                & 4.90 & 6.32 & 7.38 \% \\ 
-        \hline 
-        Current Model      & t + 1 (15 min) &  &  &  \% \\ 
-        Current Model      & t + 2 (30 min) &  &  &  \% \\ 
-        Current Model      & t + 3 (45 min) &  &  &  \% \\ 
-        \hline 
-        Pure LSTM          & t + 1 (15 min) & 3.71 & 3.71 & 5.87 \% \\
-        Pure LSTM          & t + 2 (30 min) & 4.31 & 5.63 & 6.63 \% \\
-        Pure LSTM          & t + 3 (45 min) & 4.97 & 6.41 & 7.52 \% \\
-        \hline 
-        Convolutional LSTM & t + 1 (15 min) & 2.96 & 3.94 & 5.10 \% \\
-        Convolutional LSTM & t + 2 (30 min) & 3.04 & 4.08 & 5.21 \% \\
-        Convolutional LSTM & t + 3 (45 min) & 3.17 & 4.24 & 5.37 \% \\
-        \hline 
-    \end{tabular}
-\end{table*}
+
 
 \subsection{Future work}
 For the prediction accuracy to be increased further it is proposed to apply ensemble/multi-model approaches. In this case the presented model can be included and used as a sub-model for the ensemble. Further research should be invested in the more rare, but highly impacting deviations, e.g.\ traffic incidents, extreme weather conditions, etc.
+
+
 
 \clearpage
 
