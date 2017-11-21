@@ -132,7 +132,7 @@ A Long short-term memory (LSTM) neural network is a special type of Recurrent Ne
 \begin{aligned}
   \matr{i}_t &= \sigma \left( \matr{W}^i \matr{x}_t + \matr{R}^i \matr{h}_{t-1} + \matr{U}^i \circ \matr{c}_{t-1} + \matr{b}^i \right) \\
   \matr{f}_t &= \sigma \left( \matr{W}^f \matr{x}_t + \matr{R}^f \matr{h}_{t-1} + \matr{U}^f \circ \matr{c}_{t-1} + \matr{b}^f \right) \\
-  \matr{c}_t &= \matr{f}_t \circ \matr{c}_{t-1} + \matr{i}_t \circ \mathrm{tanh} \left( \matr{W}^c \matr{x}_t + \matr{R}^c \matr{h}_{t-1} + \matr{b}_c \right) \\
+  \matr{c}_t &= \matr{f}_t \circ \matr{c}_{t-1} + \matr{i}_t \circ \mathrm{tanh} \left( \matr{W}^c \matr{x}_t + \matr{R}^c \matr{h}_{t-1} + \matr{b}^c \right) \\
   \matr{o}_t &= \sigma \left( \matr{W}^\mathit{o} \matr{x}_t + \matr{R}^\mathit{o} \matr{h}_{t-1} + \matr{U}^\mathit{o} \circ \matr{c}_{t} + \matr{b}^o \right) \\
   \matr{h}_t &= \matr{o}_t \circ \mathrm{tanh} \left( \matr{c}_t \right)
 \end{aligned}
@@ -166,7 +166,7 @@ Special care needs to be taken on the boundaries, i.e.\ where the convolutional 
 \begin{aligned}
   \matr{i}_t &= \sigma \left( \matr{W}^i * \matr{x}_t + \matr{R}^i * \matr{h}_{t-1} + \matr{U}^i \circ \matr{c}_{t-1} + \matr{b}^i \right) \\
   \matr{f}_t &= \sigma \left( \matr{W}^f * \matr{x}_t + \matr{R}^f * \matr{h}_{t-1} + \matr{U}^f \circ \matr{c}_{t-1} + \matr{b}^f \right) \\
-  \matr{c}_t &= \matr{f}_t \circ \matr{c}_{t-1} + \matr{i}_t \circ \mathrm{tanh} \left( \matr{W}^c * \matr{x}_t + \matr{R}^c * \matr{h}_{t-1} + \matr{b}_c \right) \\
+  \matr{c}_t &= \matr{f}_t \circ \matr{c}_{t-1} + \matr{i}_t \circ \mathrm{tanh} \left( \matr{W}^c * \matr{x}_t + \matr{R}^c * \matr{h}_{t-1} + \matr{b}^c \right) \\
   \matr{o}_t &= \sigma \left( \matr{W}^\mathit{o} * \matr{x}_t + \matr{R}^\mathit{o} * \matr{h}_{t-1} + \matr{U}^\mathit{o} \circ \matr{c}_{t} + \matr{b}^o \right) \\
   \matr{h}_t &= \matr{o}_t \circ \mathrm{tanh} \left( \matr{c}_t \right)
 \end{aligned}
