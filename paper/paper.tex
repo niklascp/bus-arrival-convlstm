@@ -1,4 +1,4 @@
-\documentclass[preprint,11pt,5p,twocolumn]{elsarticle}
+﻿\documentclass[preprint,11pt,5p,twocolumn]{elsarticle}
 \usepackage[utf8]{inputenc}
 \usepackage{amssymb}
 \usepackage{bm}
@@ -7,7 +7,6 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
-\usepackage{lineno}
 
 \usepackage[hidelinks]{hyperref}
 \usepackage[nameinlink]{cleveref}
@@ -66,41 +65,34 @@ with Convolutional LSTM Neural Networks}
 
 %% use optional labels to link authors explicitly to addresses:
 %% \author[label1,label2]{}
-%% \address[label1]{}
-%% \address[label2]{}
+\address[movia]{Public Transport Movia, Gammel Køge Landevej 3, 2500 Valby, Denmark}
+\address[dtu]{Department of Management Engineering, Technical University of Denmark, 2800 Kongens Lyngby, Denmark}
 
-\author{Niklas Christoffer Petersen\\[.25em]\footnotesize{niklch@dtu.dk}}
+\author[movia,dtu]{Niklas Christoffer Petersen\corref{cor1}}
+\ead{niklch@dtu.dk}
+\author[dtu]{Filipe Rodrigues}
+\ead{rodr@dtu.dk}
+\author[dtu]{Francisco Camara Pereira}
+\ead{camara@dtu.dk}
+\cortext[cor1]{Corresponding author}
 
-\address{
-  \vspace{.5em}
-  \begin{minipage}{.5\textwidth}
-    \center
-    Public Transport Movia \\
-    Gammel Køge Landevej 3, DK-2500 Valby
-  \end{minipage}% This must go next to `\end{minipage}`
-  \begin{minipage}{.5\textwidth}
-    \center
-    Department of Management Engineering \\
-    Technical University of Denmark, DK-2800 Kongens Lyngby
-  \end{minipage}
-  \vspace{-2.5em}
-}
+%\\[.25em]\footnotesize{niklch}
 
 \begin{abstract}
-Accurate and reliable predictions for travel times in public transport networks is essential for delivering an attractive service.
-This paper presents a multi-output, multi-time-step, deep neural network for bus travel time prediction using Convolutional and Long short-term memory (LSTM) layers. The method is empirically evaluated and compared to other popular approaches for link travel time prediction, and currently available services, including the currently deployed model. We find that the proposed model significantly outperforms all the other methods, and is able to detect small irregular peaks in bus travel time very quickly.
+Accurate and reliable predictions for travel times in public transport networks are essential for delivering an attractive service.
+This paper presents a multi-output, multi-time-step, deep neural network for bus travel time prediction using Convolutional and Long short-term memory (LSTM) layers. The method is empirically evaluated and compared to other popular approaches for link travel time prediction, and currently available services, including the currently deployed model at Movia, the regional public transport authority in Greater Copenhagen. We find that the proposed model significantly outperforms all the other methods, and is able to detect small irregular peaks in bus travel time very quickly.
 \end{abstract}
 
 \begin{keyword}
 %% keywords here, in the form: keyword \sep keyword
-Bus Travel Time Prediction \sep Intelligent Transport Systems \sep Convolutional Neural Network (CNN) \sep Long short-term memory (LSTM), Deep Learning.
+Bus Travel Time Prediction \sep Intelligent Transport Systems \sep Convolutional Neural Network (CNN) \sep Long short-term memory (LSTM) \sep Deep Learning.
 \end{keyword}
 
 \end{frontmatter}
 \section{Introduction}
-Public transport authorities have long found that GPS trajectory data from already deployed \emph{Automatic Vehicle Location}-systems (AVL) can be used in \emph{Intelligent Transport Systems} (ITS) \cite{Tcrp48}. Examples include real-time traffic information for passengers, e.g.\ smartphone travel planner apps, in-vehicle infotainment screens and departure boards. Studies has shown that reliable real-time information at bus stops has a statistical significant dampening effect on the perceived waiting time \cite{Fan2016}.
+Public transport authorities have long found that GPS trajectory data from already deployed \emph{Automatic Vehicle Location}-systems (AVL) can be used in \emph{Intelligent Transport Systems} (ITS) \cite{Tcrp48}. Examples include real-time traffic information for passengers, e.g.\ smartphone travel planner apps, in-vehicle infotainment screens and departure boards. Studies have shown that reliable real-time information at bus stops has a statistical significant dampening effect on the perceived waiting time \cite{Fan2016}.
 
-Besides real-time passenger information, robust arrival- and departure time predictions are necessary for operating more sophisticated ITS applications successfully, e.g. \emph{connection assurance} between low frequent public transport services, where accurate arrival times are needed to decide if one of the services should wait on the other. Another example is \emph{demand-adaptive transit systems}, where prolonged travel time should be taken into account because of the influence on both vehicle and driver utilization, and thus the efficiency of the transit system. Arrival/departure time prediction is commonly approached as a specialization of travel time prediction as illustrated in \Cref{fig:bus-arrival-links}. The predicted travel time for each link is simply accumulated downstream the route to yield the arrival/departure time predictions at each stop point of the rest of the current journey. Besides the link travel time, estimations of dwell time (i.e.\ when a bus is holding at a stop point) are also accumulated downstream.
+Besides real-time passenger information, robust arrival- and departure time predictions are necessary for operating more sophisticated ITS applications successfully, e.g. \emph{connection assurance} between low frequent public transport services, where accurate arrival times are needed to decide if one of the services should wait on the other. Another example is \emph{demand-adaptive transit systems}, where prolonged travel time should be taken into account because of the influence on both vehicle and driver utilization, and thus the efficiency of the transit system. Arrival/departure time prediction is commonly approached as a specialization of travel time prediction as illustrated in \Cref{fig:bus-arrival-links}. The predicted travel time for each link is simply accumulated downstream the route to yield the arrival/departure time predictions at each stop point of the rest of the current journey. Thus, in the example, to predict when the bus at stop A will arrive at stop B, we would just sum our predicted link travel times for Link 1 to 3. Besides the link travel time, estimations of dwell time (i.e.\ when a bus is holding at a stop point) should also be accumulated downstream.
 
 \begin{figure}[!ht]
   \center  
@@ -109,24 +101,24 @@ Besides real-time passenger information, robust arrival- and departure time pred
   \label{fig:bus-arrival-links}
 \end{figure}
 
-Producing precise bus travel time predictions in areas with little external influence, e.g.\ rural areas, can be solved to a large extent with historical averaging or simple regression methods \cite{Williams2003,Altinkaya2013}. The problem becomes much more complex in urban areas where congestion, events, road-works, weather, etc.\ highly influence the traffic flow and passenger demand. As on-board GPS and AVL-systems has become more affordable and common, data has both grown in coverage, i.e.\ number of vehicles with AVL installed, and frequency, i.e.\ number of GPS-positions collected per vehicle.
+Producing precise bus travel time predictions in areas with little external influence, e.g.\ rural areas, can be solved to a large extent with historical averaging or simple regression methods \cite{Williams2003,Altinkaya2013}. The problem becomes much more complex in urban areas where congestion, events, road-works, weather, etc.\ highly influence the traffic flow and passenger demand. As on-board GPS and AVL-systems have become more affordable and common, data has both grown in coverage, i.e.\ number of vehicles with AVL installed, and frequency, i.e.\ number of GPS-positions collected per vehicle.
 
-In this paper we present a multi-output, multi-time-step deep neural network for bus travel time prediction using a combination of \emph{Convolutional} and \emph{Long short-term memory} (LSTM) \cite{Lstm1,Lstm2} layers. The goal of this work is to produce precise short-term predictions (e.g.\ $0-1.5$ hours) for link travel time, specifically for bus traffic in urban areas. The method is empirically evaluated and compared to other popular approaches for link travel time prediction, including the currently model deployed in production by the public transport authority for the Greater Copenhagen Area: \emph{Movia}. Furthermore the method is compared to Google Traffic (part of Google Maps), a popular online service for travel time prediction. 
+In this paper we present a multi-output, multi-time-step deep neural network for bus travel time prediction using a combination of \emph{Convolutional} and \emph{Long short-term memory} (LSTM) \cite{Lstm1,Lstm2} layers. The goal of this work is to produce precise short-term predictions (e.g. up to\ $0-1.5$ hours in the future) for link travel time, specifically for bus traffic in urban areas. The method is empirically evaluated and compared to other popular approaches for link travel time prediction, including the currently model deployed in production by the public transport authority for the Greater Copenhagen Area: \emph{Movia}. Furthermore the method is compared to Google Traffic (part of Google Maps), a popular online service for travel time prediction. 
 
 This paper is structured in the following manner: In the next section, related work and literature are reviewed. \Cref{sec:convlstm} introduces Convolutional LSTM neural networks in general and in \Cref{sec:model} we present the proposed multi-output model in more details, including e.g.\ network topology, etc. \Cref{sec:experiments} introduces the Copenhagen-dataset, which the model has been evaluated on, and our results are presented and discussed in~\Cref{sec:results}. Finally we conclude on the work in~\Cref{sec:conclusion}.
 
 \section{Literature review}
-Bus link travel time prediction has been explored in research as GPS and AVL data has become increasingly available. The problem overlaps with other research areas such as general traffic flow and speed estimation, but also has unique constraints and opportunities that follows from servicing a fixed route. The improvement in computational power in the recent decades has gradually allowed more complex link travel time models with increased precision.
+Bus link travel time prediction has been explored in research as GPS and AVL data has become increasingly available. The problem overlaps with other research areas such as general traffic flow and speed estimation, but also has unique constraints and opportunities that follow from servicing a fixed route. The improvement in computational power in the recent decades has gradually allowed more complex link travel time models with increased precision.
 
-Early approaches for bus travel time prediction rely on historical averaging models \cite{Dailey1999,Sun2007}, and linear regression \cite{Patnaik2004}. Recent research presents this type of model only for comparison purposes, and the models are in all cases outperformed by the proposed models \cite{Shalaby2004,Jeong2005}. A historical averaging model will only slowly converge to changes in the travel time, which of cause is undesired with short, but highly impacting, external influences (e.g.\ a traffic incident or large event). 
+Early approaches for bus travel time prediction rely on historical averaging models \cite{Dailey1999,Sun2007}, and linear regression \cite{Patnaik2004}. Recent research presents this type of models only for comparison purposes, and in all cases, these are outperformed by the proposed alternatives \cite{Shalaby2004,Jeong2005}. A historical averaging model will only slowly converge to changes in the travel time, which of cause is undesired with short, but highly impacting, external influences (e.g.\ a traffic incident or large event). 
 
-Kalman-filters, which by its capabilities of maintaining state between predictions, has shown interest from several studies for capturing \emph{changes} in the travel time, either as an independent model \cite{Chen2001,Shalaby2004} or in combination with other models \cite{Yo2010,Bai2015}. The Kalman-filter models still have limited options for capturing and forecasting the complex dynamics of travel and dwell time in a metropolitan bus system. E.g., the Kalman-filter's state is only directly accessible for the leading time-step, and thus not capable of finding long-distance patterns spanning over several links and/or over several time-steps. This is substantiated by \cite{Lin2013} and \cite{Kumar2014}, who find artificial neural networks (ANN) to outperform Kalman-filter models. However, the computational challenges of fully connected ANNs are also limiting the depth of the network and thus how complex patterns it can learn to recognize. This has sparked the interest for studying composite or hybrid models. \citet{Bai2015} uses a two-stage approach by combining an offline ANN-model, with an adaptable/online Kalman-filter to yield a dynamic model. The model is not actually learning in the long term, but is able to adapt to temporal variations in the current travel time on a journey, and is still not able to recognize long distance patterns. The proposed model in this work uses \emph{Long short-term memory} cells (LSTM), and differs from existing research in bus link travel time prediction by combining the capability for persisting state-space over multiple time-steps, while allowing the deep neural network to be feasibly trainable.
+Kalman-filters, which by their capabilities of maintaining state between predictions, have shown interest from several studies for capturing \emph{changes} in the travel time, either as an independent model \cite{Chen2001,Shalaby2004} or in combination with other models \cite{Yo2010,Bai2015}. The Kalman-filter models still have limited options for capturing and forecasting the complex dynamics of travel and dwell time in a metropolitan bus system. E.g., the Kalman-filter's state is only directly accessible for the leading time-step, and thus not capable of finding long-distance patterns spanning over several links and/or over several time-steps. This is substantiated by \cite{Lin2013} and \cite{Kumar2014}, who find artificial neural networks (ANN) to outperform Kalman-filter models. However, the computational challenges of fully connected ANNs are also limiting the depth of the network and thus how complex patterns it can learn to recognize. This has sparked the interest for studying composite or hybrid models. \citet{Bai2015} uses a two-stage approach by combining an offline ANN-model, with an adaptable/online Kalman-filter to yield a dynamic model. The model is not actually learning in the long term, but is able to adapt to temporal variations in the current travel time on a journey, and is still not able to recognize long distance patterns. The proposed model in this work uses \emph{Long short-term memory} cells (LSTM), and differs from existing research in bus link travel time prediction by combining the capability for persisting state-space over multiple time-steps, while allowing the deep neural network to be feasibly trainable.
 
-Some recent research recognizes that several routes can benefit from each other's predictions if they share some partial route segment, e.g.\ \cite{Yu2011,Gal2014,Bai2015}, however none of these approaches consider cross temporal correlations between different route segments, and only use a small window for correlation with upstream links (e.g.\ max.\ 3 links). Likewise, \citet{YanjieDuan2016} proposes to use a LSTM model for general highway travel time prediction, and do predict multiple time-steps ahead, but only for a single link at a time, i.e.\ cross link (spatial) correlations are lost. In contrast the combination of both \emph{LSTM} cells and \emph{Convolutional} filters for bus travel time prediction, proposed in this paper, allows the learned patterns to generalize beyond a single link and time, i.e.\ multi-output and multi-time-step. Furthermore this reduces the computational complexity by magnitudes compared to fully connected ANNs capable of capturing similar complex patterns.
+Some recent research recognizes that several routes can benefit from each other's predictions if they share some partial route segment, e.g.\ \cite{Yu2011,Gal2014,Bai2015}, however none of these approaches consider cross temporal correlations between different route segments, and only use a small window for correlation with upstream links (e.g.\ max.\ 3 links). Likewise, \citet{YanjieDuan2016} proposes to use a LSTM model for general highway travel time prediction, and do predict multiple time-steps ahead, but only for a single link at a time, i.e.\ cross link (spatial) correlations are lost. In contrast the combination of both \emph{LSTM} cells and \emph{Convolutional} filters for bus travel time prediction, proposed in this paper, allows the learned patterns to generalize beyond a single link and time, i.e.\ multi-output and multi-time-step. Furthermore this reduces the computational complexity by orders of maginitude compared to fully connected ANNs capable of capturing similar complex patterns.
 
 \section{Convolutional LSTM neural networks}
 \label{sec:convlstm}
-A Long short-term memory (LSTM) neural network is a special type of Recurrent Neural Network~(RNN) which has proven robust for capturing long-distance dependencies \cite{Lstm1,Lstm2}. The important feature of a LSTM network is its capability to persist cell state, $\matr{c}_t$, from previous observations across sequences of input (e.g.\ time), but also eliminate information which is considered irrelevant. To allow this mechanism the persistence of information is controlled by three gates: \emph{input gate}, \emph{forget gate}, and \emph{output gate}. Each gate yields a state variable at time $t$, respectively $\matr{i}_t$, $\matr{f}_t$, and $\matr{o}_t$, along with the cell output, $\matr{h}_t$, cf.~\cref{eq:lstm}, where $\circ$ denotes the entry-wise product.
+A Long short-term memory (LSTM) neural network is a special type of Recurrent Neural Network~(RNN) which has proven robust for capturing long-distance dependencies \cite{Lstm1,Lstm2}. The important feature of a LSTM network is its capability to persist cell state, $\matr{c}_t$, from previous observations across sequences of input (e.g.\ time), but also eliminate information which is considered irrelevant. To allow this mechanism the persistence of information is controlled by three gates: \emph{input gate}, \emph{forget gate}, and \emph{output gate}. Each gate yields a state variable at time $t$, respectively $\matr{i}_t$, $\matr{f}_t$, and $\matr{o}_t$, along with the cell output, $\matr{h}_t$, cf.~\cref{eq:lstm}, where $\circ$ denotes the element-wise product.
 
 \begin{equation}
 \begin{aligned}
@@ -154,12 +146,12 @@ Convolutional Neural Networks~(CNN) on the other hand have been widely used for 
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[scale=.45]{drawings/conv.pdf}
+  \includegraphics[scale=.5]{drawings/conv.pdf}
   \caption{Application of Convolutional filter onto 1D data.}
   \label{fig:conv}
 \end{figure}
 
-Special care needs to be taken on the boundaries, i.e.\ where the convolutional filter will exceed the input. A popular approach to avoid the size of the output decreases is to pad the input, e.g.\ with zeros. This ensures that the output shape of each convolutional unit will always be identical to the input shape, which is often desirable. One of the key benefits of convolutional networks is that the number of weights that needs to be learned is considerably reduced compared to fully connected networks, and that learned patterns can be transfered across space. I.e.\ the convolutional filters become feature detectors, that in our case can detect spatial patterns across links, e.g.\ congestion forming, etc.   
+Special care needs to be taken on the boundaries, i.e.\ where the convolutional filter will exceed the input. To avoid that the size of the output decreases, an approach is to pad the input, e.g.\ with zeros. This ensures that the output shape of each convolutional unit will always be identical to the input shape, which is often desirable. One of the key benefits of convolutional networks is that the number of weights that needs to be learned is considerably reduced compared to fully connected networks, and that learned patterns can be transfered across space. I.e.\ the convolutional filters become feature detectors, that in our case can detect spatial patterns across links, e.g.\ congestion forming, etc.   
 
 \citet{ConvLSTM} introduced the novel combination of Convolutional and LSTM layers into a single structure, the \emph{Convolutional LSTM}, or simply \emph{ConvLSTM}. Specifically the method applies convolutional filters in the \emph{input-to-state} and \emph{state-to-state} transitions of the LSTM cf.~\cref{eq:convlstm}, where $*$ denotes the convolution operator.
 \begin{equation}
@@ -183,7 +175,6 @@ Special care needs to be taken on the boundaries, i.e.\ where the convolutional 
 
 The output dimensionality of a \emph{ConvLSTM} layer is like the traditional CNN-layer determined by the number of filters applied. However, \emph{ConvLSTMs} require a total of eight filters for each desired output, i.e.\ four \emph{input-to-state} filters ($\matr{W}^i$, $\matr{W}^f$, $\matr{W}^c$, and $\matr{W}^o$) and four \emph{state-to-state} filters ($\matr{R}^i$, $\matr{R}^f$, $\matr{R}^c$, and $\matr{R}^o$).
 Still it is important to emphasize that application of convolutional filters to the LSTM model greatly reduces the number of weights that needs to be learned, compared to a \emph{pure LSTM} approach. This allows for even deeper networks.
-\newpage
 
 \section{Multi-output model}
 \label{sec:model}
@@ -291,7 +282,7 @@ To allow predictions for fixed time-steps ahead, data is aggregated at a fixed t
 
 For this experiment data was aggregated into 15-minute time-steps and normalized cf.~\Cref{sec:model}. This resolution was chosen based on a measured mean \emph{headway} of $7.5$ minutes between 06:00 and 22:00, i.e.\ the time between two vehicles during daytime.
 
-Given the time resolution, we set the fixed window size, $w = 32$, equivalent of 8 hours, to allow pattern in the morning peak affect patterns in the afternoon peak. We set $k = 3$ to allow predictions of up to 45 minutes into the future. 
+Given the time resolution, we set the fixed window size, $w = 32$, equivalent of 8 hours, to allow patterns in the morning peak affect patterns in the afternoon peak. We set $k = 3$ to allow predictions of up to 45 minutes into the future. 
 
 \subsection{Evaluation}
 In order to evaluate the proposed model and comparisons, the following measures are used: \emph{mean absolute error} (MAE), \emph{root mean square error} (RMSE), and \emph{mean absolute percentage error} (MAPE) cf.~\cref{eq:mae,eq:rmse,eq:mape}, where $\matr{Y}_i$ is the true link travel times for sample $i$ and $\matr{\widehat{Y}}_i$ is the predicted travel times. Since the multi-output, multi-time-step model predicts link travel times for all $u$ links for the next $k$ time steps, $\matr{Y}_i$ and $\matr{\widehat{Y}}_i$ have both the dimensionality $w \times u \times 1$.
@@ -367,7 +358,7 @@ Before going into a direct comparison, it is important to understand some aspect
 The performance of the historical average is independent with respect to the number of time steps ahead it predicts, as it just represents a weekly cycle of mean link travel times.
 
 \subsection{Current model}
-Measurements for the currently deployed bus prediction model were collected at a 5-minute frequency using a non-publicly accessible endpoint at the transport authority. The model is based on an historical average model, but also has a rule based mechanism on top, which can override or adjust the historical link travel times. For instance it will assume that a delayed vehicle can recover (partially or completely) from its delay by traversing links faster. Of course such an assumption can be problematic in an urban area with lots of external traffic effects. 
+Measurements for the currently deployed bus prediction model were collected at a 5-minute frequency using a non-publicly accessible endpoint at the transport authority. The model is based on a historical average model, but also has a rule based mechanism on top, which can override or adjust the historical link travel times. For instance it will assume that a delayed vehicle can recover (partially or completely) from its delay by traversing links faster. Of course such an assumption can be problematic in an urban area with lots of external traffic effects. 
 
 \subsection{Pure LSTM}
 The pure LSTM-model for link travel time prediction is similar to the model proposed by \citet{YanjieDuan2016}. The model was trained on the exact same dataset as the \emph{ConvLSTM} model, and has a similar architecture, but without the convolutional filters.
@@ -382,19 +373,19 @@ Another important aspect is that the Google Traffic model is primary designed fo
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth]{plots/comparison_day.pdf}
-  \caption{}
+  \caption{Accumulated link travel Time over a single day (a Thursday) in the test set.}
   \label{fig:comparison_day}
 \end{figure*}
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth]{plots/comparison_day_2.pdf}
-  \caption{}
+  \caption{Accumulated link travel Time over a single day (a Friday) in the test set.}
   \label{fig:comparison_day_2}
 \end{figure*}
 
 
 \subsection{Comparison}
-We compare the performance of the proposed \emph{ConvLSTM} model for bus link travel time prediction against the presented baseline models. The overall results from \Cref{tab:results} shows that the \emph{ConvLSTM} model outperforms the other methods. The \emph{current model} performs the worst, even compared to the \emph{historical average} model, on which it is based. This is most likely due to the rule-based enforcement of recovery from delays, even though the data weights against a recovery.
+We compare the performance of the proposed \emph{ConvLSTM} model for bus link travel time prediction against the presented baseline models. The overall results from \Cref{tab:results} shows that the \emph{ConvLSTM} model outperforms the other methods. The \emph{current model} performs the worst, even compared to the \emph{historical average} model, on which it is based. This is most likely due to the rule-based enforcement of recovery from delays, even though the data weighs against a recovery.
 
 Although the advantage might seem small it is emphasized that evaluation measurements are averaging their response, and thus the increased accuracy can be much higher on individual journeys, especially if they experience very irregular travel times. To investigate this, we focus our analysis on periods when the transport system is most vulnerable, and even small changes in regularity can propagate, since recovery is not an option, i.e.\ morning and afternoon peaks.
 
@@ -406,7 +397,7 @@ Although the advantage might seem small it is emphasized that evaluation measure
   \hline
   Historical Average &        6.40 &       5.57 &     10.62 \% \\ \hline
   Current Model      &        6.69 &       5.88 &     11.22 \% \\ \hline
-  Pure LSTM          &        0.00 &       0.00 &      0.00 \% \\ \hline
+  Pure LSTM          &        3.80 &       3.16 &      6.01 \% \\ \hline
   Google Traffic     &        5.25 &       4.62 &      9.17 \% \\ \hline
   ConvLSTM           &        2.64 &       2.09 &      4.04 \% \\ \hline
   \end{tabular}
@@ -423,7 +414,7 @@ Although the advantage might seem small it is emphasized that evaluation measure
   \hline
   Historical Average &    5.90 &   4.65 &  8.28 \% \\ \hline
   Current Model      &    6.28 &   5.20 &  9.37 \% \\ \hline
-  Pure LSTM          &    0.00 &   0.00 &  0.00 \% \\ \hline
+  Pure LSTM          &    5.26 &       3.97 &      7.08 \% \\ \hline
   Google Traffic     &    4.16 &   3.34 &  6.21 \% \\ \hline
   ConvLSTM           &    3.79 &   3.02 &  5.61 \% \\ \hline
   \end{tabular}
@@ -431,15 +422,15 @@ Although the advantage might seem small it is emphasized that evaluation measure
   \label{tab:afternoon_peak}  
 \end{table}
 
-\Cref{tab:morning_peak} and \Cref{tab:afternoon_peak} shows the evaluation results for \emph{morning peaks (weekdays, 7--9)} and \emph{afternoon peaks (weekdays, 14--18)} respectively for the time-step $t + 1$.
+\Cref{tab:morning_peak} and \Cref{tab:afternoon_peak} show the evaluation results for \emph{morning peaks (weekdays, 7--9)} and \emph{afternoon peaks (weekdays, 14--18)} respectively for the time-step $t + 1$.
 
-The peak hour evaluation shows that the \emph{ConvLSTM} model increases its performance over the baseline models when the transport network is put under stress. In the morning peak, the \emph{ConvLSTM} model performs similar as the overall, whereas the baseline models all experience decreased performance of up to several minutes in both the RMSE and MAE, and an increased MAPE of roughly one third. 
+The peak hour evaluation shows that the \emph{ConvLSTM} model increases its performance over the baseline models when the transport network is put under stress. In the morning peak, the \emph{ConvLSTM} model does not degrade in performormance compared to the overall daytime results, whereas the baseline models all experience decreased performance of up to several minutes in both the RMSE and MAE, and an increased MAPE of roughly one third. 
 
 Likewise the afternoon peak evaluation shows improvements with respect to the baseline models, even though the \emph{ConvLSTM} model also decreases its performance compared to the overall results. The outperformance is neither as significant as in the morning peak, and as the \emph{Google Traffic} model also performs quite well leaving the gap less than a minute. 
 
 To get a more detailed view of how the different models perform on the micro-level (i.e.\ the specific journey) we can inspect a single day of predictions. A random weekday from the test-dataset is plotted in~\Cref{fig:comparison_day}, which shows the accumulated travel time of all 32 links and the predicted travel time at time-step $t + 1$ both for the proposed and baseline models.
 
-In this particular day (a Thursday) the peak hour traffic was worse than normal, which leads both the \emph{historic averaging} model and the \emph{current model} to both underestimate travel time in the peak periods. Remember that the \emph{current model} is based on the \emph{historic averaging} model, so it is not unexpected that they perform very similar. There is also small peak in travel time in the midday hours, which none of these historic averaging models are able to predict.
+In this particular day (a Thursday) the peak hour traffic was worse than normal, which leads both the \emph{historic averaging} model and the \emph{current model} to both underestimate travel time in the peak periods. Remember that the \emph{current model} is based on the \emph{historic averaging} model, so it is not unexpected that they perform very similar. There is also a small peak in travel time in the midday hours, which none of these historic averaging models are able to predict.
 
 On the other hand, both the \emph{Google Traffic} model and the proposed \emph{ConvLSTM} model get much closer to the ground truth in the peak hours. The \emph{Google Traffic} model seems to predict more accurate then \emph{ConvLSTM} model in the afternoon peak, whereas the opposite occurs in the morning peak. Even more interesting is the detection of the irregular peak in the midday hours, which both the \emph{Google Traffic} model and the proposed \emph{ConvLSTM} model are able to adjust to, at least to some degree.
 

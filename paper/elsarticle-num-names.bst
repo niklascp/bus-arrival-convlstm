@@ -912,7 +912,7 @@ FUNCTION {article}
  if$
  format.issn output
  format.doi output
- format.url output
+ %format.url output
  format.note output
  fin.entry
 }
@@ -942,7 +942,7 @@ FUNCTION {book}
  format.edition output
  format.isbn output
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -956,7 +956,7 @@ FUNCTION {booklet}
  address "address" bibinfo.check output
  format.isbn output
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -995,7 +995,7 @@ FUNCTION {inbook}
  if$
  format.pages "pages" output.check
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -1021,7 +1021,7 @@ FUNCTION {incollection}
  if$
  format.pages "pages" output.check
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -1049,7 +1049,7 @@ FUNCTION {inproceedings}
  if$
  format.pages "pages" output.check
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -1064,7 +1064,7 @@ FUNCTION {manual}
  address "address" bibinfo.check output
  format.edition output
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -1080,7 +1080,7 @@ FUNCTION {mastersthesis}
  school "school" bibinfo.warn output
  address "address" bibinfo.check output
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -1108,7 +1108,7 @@ FUNCTION {phdthesis}
  school "school" bibinfo.warn output
  address "address" bibinfo.check output
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -1130,7 +1130,7 @@ FUNCTION {proceedings}
  format.isbn output
  format.issn output
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -1146,7 +1146,7 @@ FUNCTION {techreport}
  institution "institution" bibinfo.warn output
  address "address" bibinfo.check output
  format.doi output
- format.url output
+ %format.url output
  format.note output
  format.date "year" output.check
  fin.entry
@@ -1158,7 +1158,7 @@ FUNCTION {unpublished}
  author format.key output
  format.title "title" output.check
  format.doi output
- format.url output
+ %format.url output
  format.note "note" output.check
  format.date output
  fin.entry
