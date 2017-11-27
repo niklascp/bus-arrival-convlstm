@@ -1,0 +1,12 @@
+Histrically tthe subject has been solved by using hosroical observations and doing traditional time series forecasting - i. e given the proeviuous 20 os. forecast the next 10 otravel times.
+
+Another aprooach ha been to include only a very small winfdows of samples (e.g. 3 samples) and add other features (headway, passenger demand, etc.) and do different statisical models on these. This include linear regression, general lieaar regression and min more recent: support vector machines or suport vector regression or neaural networks.
+
+One issue that I have identified is the use of single-outpus models. I.e. a link travel time is predicted indenpently of the other links ion the rouse. This is afcuase a simple approach, but there is clear evicense that the travel times on the links are correlated as congestion patterns impact geographially neabous to the each other. For this reason this paper propses a multi-outout model that takes the geospacial dependencies into account, i.e. --------- hmmm hmm hmm hmm hmm hmmh . By allowing each link incluence the travel time of the other links it is possible to detect cross temporal, cross spacial patterns. 
+hmm mm hmm hmmm hmmm hmm hmmm hmmm hmm i dont know - what should go now? we could take about how the different algorithms work: ok lets do that  
+
+The neural network models presented in resent research are often very narrow, e. g. 2-3 layers and fully connected. That is, they are basically simple MLP with very few weights to estimate (examople) 200? - it is calaimed in this paper that this is insufucciant to capture the complex croos temporal croos spacial correlations that can occour in a public trantport netowrk. On the other hand the use on bth linear SVR and non-linear SVM ( u
+
+)---
+Early into:
+GPS traces are collected from onboeach GPS sensors and either matched to the expected route in on-board equipment, or centrally. The map matching allows detection of arrivals and departures from at the expected stop points.
